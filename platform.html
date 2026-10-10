@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>链宠守护 · 全链条流浪动物救助帮扶平台（演示版）</title>
+<style>
+:root{
+  --ink:#23434A; --ink-2:#3C5A66; --red:#C8384A; --red-deep:#8E2434;
+  --teal:#5E8F86; --teal-l:#DDEBE8; --gold:#E9A23B; --gold-l:#FBF0DA;
+  --bg:#FAF6F0; --card:#FFFFFF; --line:#E7DED2;
+  --text:#353535; --sub:#6B6B6B; --blush:#F7E3E5;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);font-family:"Microsoft YaHei","PingFang SC",sans-serif;color:var(--text);min-height:100vh}
+
+/* ===== 顶栏 ===== */
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;background:linear-gradient(120deg,var(--ink) 0%,var(--ink-2) 100%);box-shadow:0 2px 12px rgba(35,67,74,.25)}
+.brand{color:#fff;font-size:20px;font-weight:800;letter-spacing:1px}
+.brand em{font-style:normal;font-size:11px;background:var(--red);border-radius:20px;padding:3px 10px;margin-left:10px;vertical-align:3px}
+.tabs{display:flex;gap:10px}
+.tabs button{border:1px solid rgba(255,255,255,.35);background:transparent;color:#DDE8EA;font-size:14px;
+  padding:8px 20px;border-radius:22px;cursor:pointer;transition:.2s}
+.tabs button:hover{background:rgba(255,255,255,.12)}
+.tabs button.active{background:var(--red);border-color:var(--red);color:#fff;font-weight:700}
+
+main{max-width:1240px;margin:0 auto;padding:26px 20px 60px}
+.tab{display:none}.tab.active{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+h2.sec{font-size:20px;color:var(--ink);margin:26px 0 14px;padding-left:12px;border-left:5px solid var(--red)}
+.note{font-size:12px;color:#A9A29A;margin-top:4px}
+
+/* ===== 居民端布局 ===== */
+.resident-wrap{display:flex;gap:26px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.fnote{width:230px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px;font-size:12.5px;color:var(--sub);line-height:1.7}
+.fnote b{display:block;color:var(--ink);font-size:14px;margin-bottom:6px}
+.fnote .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px}
+.fnote.teal .dot{background:var(--teal)}
+.fnote.gold .dot{background:var(--gold)}
+.fnote{margin-top:70px}
+
+/* 手机壳 */
+.phone{width:390px;height:780px;background:#111a1f;border-radius:44px;padding:12px;box-shadow:0 24px 60px rgba(35,67,74,.35);position:relative;flex-shrink:0}
+.phone::before{content:"";position:absolute;top:22px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#111a1f;border-radius:14px;z-index:9}
+.screen{width:100%;height:100%;background:#F6F1E9;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.statusbar{height:46px;background:var(--ink);color:#fff;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 6px;font-size:11px;flex-shrink:0}
+.pbody{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.pbody::-webkit-scrollbar{display:none}
+.pscreen{display:none}.pscreen.active{display:block;animation:fade .2s}
+
+/* 首页 */
+.apphead{background:linear-gradient(135deg,var(--ink),var(--ink-2));padding:14px 18px 18px;color:#fff}
+.apphead .hi{font-size:12px;color:#B9CDD1}
+.apphead .loc{font-size:15px;font-weight:700;margin-top:2px}
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:-2px 14px 0;background:#fff;border-radius:16px;padding:14px 8px;box-shadow:0 4px 14px rgba(35,67,74,.08)}
+.q{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--ink);cursor:pointer}
+.q i{font-style:normal;width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.q:nth-child(1) i{background:var(--blush)} .q:nth-child(2) i{background:var(--teal-l)}
+.q:nth-child(3) i{background:var(--gold-l)} .q:nth-child(4) i{background:#E3ECF5}
+.card-m{background:#fff;border-radius:16px;margin:12px 14px;padding:14px;box-shadow:0 3px 10px rgba(35,67,74,.06)}
+.mtitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.mtitle b{font-size:14px;color:var(--ink)}
+.mtitle span{font-size:11px;color:var(--red)}
+.mapbox{position:relative;height:180px;border-radius:12px;overflow:hidden;
+  background:linear-gradient(150deg,#DCE9E4 0%,#CFE0DC 45%,#D8E6E9 100%)}
+.mapbox .road{position:absolute;background:rgba(255,255,255,.7)}
+.mp{position:absolute;width:30px;height:30px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);
+  background:var(--red);border:2px solid #fff;box-shadow:0 3px 8px rgba(200,56,74,.4);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:13px}
+.mp i{font-style:normal;transform:rotate(45deg)}
+.mp.t{background:var(--teal);box-shadow:0 3px 8px rgba(94,143,134,.4)}
+.mp.g{background:var(--gold);box-shadow:0 3px 8px rgba(233,162,59,.4)}
+.mp.pulse::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--red);animation:pu 1.6s infinite}
+@keyframes pu{0%{transform:scale(.7);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+.feed-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);align-items:flex-start}
+.feed-item:last-child{border:none}
+.feed-item .ava{width:38px;height:38px;border-radius:12px;background:var(--blush);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.feed-item .t{font-size:12.5px;color:var(--ink);font-weight:600}
+.feed-item .d{font-size:11px;color:var(--sub);margin-top:2px;line-height:1.5}
+.feed-item .time{margin-left:auto;font-size:10px;color:#B5ACA0;flex-shrink:0}
+
+/* 底部导航 */
+.pnav{height:62px;background:#fff;border-top:1px solid var(--line);display:flex;flex-shrink:0}
+.pnav button{flex:1;border:none;background:none;font-size:10.5px;color:#9AA6A8;cursor:pointer;padding-top:8px}
+.pnav button i{font-style:normal;display:block;font-size:20px;margin-bottom:2px}
+.pnav button.active{color:var(--red);font-weight:700}
+
+/* 云认养 */
+.adoption-hero{background:linear-gradient(135deg,var(--teal),#7BAF9F);margin:14px;border-radius:16px;padding:16px;color:#fff}
+.adoption-hero b{font-size:15px}
+.adoption-hero p{font-size:11.5px;opacity:.9;margin-top:4px;line-height:1.6}
+.guard-bar{margin-top:10px}
+.guard-bar .row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px}
+.guard-bar .track{height:8px;background:rgba(255,255,255,.3);border-radius:4px}
+.guard-bar .fill{height:100%;width:66%;background:#fff;border-radius:4px}
+.petrow{display:flex;gap:12px;align-items:center}
+.pet-avatar{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--gold-l);flex-shrink:0}
+.btn-mini{margin-left:auto;border:none;border-radius:16px;padding:7px 14px;font-size:11.5px;cursor:pointer;background:var(--red);color:#fff;font-weight:600}
+.btn-mini.ghost{background:none;border:1px solid var(--red);color:var(--red)}
+.tl{margin-top:6px}
+.tl .tli{display:flex;gap:10px;font-size:11.5px;padding:7px 0;color:var(--sub)}
+.tl .tli::before{content:"●";color:var(--teal);font-size:8px;line-height:2}
+
+/* 领养 */
+.chips{display:flex;gap:8px;margin:14px 14px 0}
+.chip2{border:1px solid var(--line);background:#fff;border-radius:16px;font-size:11.5px;padding:6px 14px;cursor:pointer;color:var(--sub)}
+.chip2.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.adopt-card{display:flex;gap:12px;background:#fff;border-radius:16px;margin:12px 14px;padding:12px;box-shadow:0 3px 10px rgba(35,67,74,.06)}
+.tagline{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.tagline em{font-style:normal;font-size:10px;background:var(--blush);color:var(--red);border-radius:10px;padding:2px 8px}
+
+/* 我的 */
+.me-hero{background:linear-gradient(135deg,var(--ink),var(--ink-2));margin:14px;border-radius:16px;padding:18px;color:#fff;text-align:center}
+.me-hero .pt{font-size:34px;font-weight:800;color:var(--gold)}
+.me-hero .pl{font-size:11px;color:#B9CDD1;margin-top:2px}
+.badges{display:flex;justify-content:center;gap:8px;margin-top:12px}
+.badges span{font-size:10.5px;background:rgba(255,255,255,.14);border-radius:12px;padding:4px 10px}
+.record{display:flex;justify-content:space-between;font-size:12px;padding:10px 2px;border-bottom:1px dashed var(--line);color:var(--sub)}
+.record b{color:var(--ink)}
+.record .st{font-size:10.5px;color:var(--teal)}
+
+/* 协会端 / 救助站端 */
+.dash{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{background:linear-gradient(135deg,#fff,#FDF9F3);border:1px solid var(--line);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--red)}
+.kpi:nth-child(2)::before{background:var(--teal)} .kpi:nth-child(3)::before{background:var(--gold)} .kpi:nth-child(4)::before{background:var(--ink-2)}
+.kpi b{font-size:26px;color:var(--ink)}
+.kpi small{display:block;color:var(--sub);font-size:12px;margin-top:3px}
+.kpi .up{position:absolute;right:14px;top:14px;font-size:11px;color:var(--teal);font-weight:700}
+.dash-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:16px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--sub)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--ink);color:#fff;padding:9px 10px;text-align:left;font-weight:600}
+td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--sub)}
+tr:nth-child(even) td{background:#FBF7F1}
+.st-pill{font-size:11px;border-radius:12px;padding:3px 10px;font-weight:600}
+.st-wait{background:var(--gold-l);color:#B4791E}
+.st-ok{background:var(--teal-l);color:var(--teal)}
+.st-no{background:var(--blush);color:var(--red)}
+.btn-row{display:flex;gap:6px}
+.btn-s{border:none;border-radius:12px;padding:5px 12px;font-size:11.5px;cursor:pointer;font-weight:600}
+.btn-ok{background:var(--teal);color:#fff}.btn-no{background:none;border:1px solid var(--red);color:var(--red)}
+.warn{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px dashed var(--line)}
+.warn:last-child{border:none}
+.warn .wi{width:36px;height:36px;border-radius:12px;background:var(--blush);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.warn b{font-size:12.5px;color:var(--ink);display:block}
+.warn p{font-size:11.5px;color:var(--sub);margin-top:2px}
+.warn button{margin-left:auto;flex-shrink:0}
+
+/* 救助站端 */
+.alert-banner{display:flex;gap:14px;flex-wrap:wrap}
+.alert-card{flex:1;min-width:280px;background:linear-gradient(135deg,#FFF6F6,#FDEDED);border:1px solid #F2C9CE;border-radius:14px;padding:16px}
+.alert-card .ah{display:flex;align-items:center;gap:8px;color:var(--red);font-weight:700;font-size:14px}
+.alert-card p{font-size:12px;color:var(--sub);margin:8px 0 12px;line-height:1.6}
+.pet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pet-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.pet-card .pava{width:64px;height:64px;margin:0 auto;border-radius:50%;background:var(--gold-l);display:flex;align-items:center;justify-content:center;font-size:34px}
+.pet-card b{display:block;font-size:14px;color:var(--ink);margin-top:8px}
+.pet-card small{color:var(--sub);font-size:11px}
+.pet-card .tagline{justify-content:center;margin-top:8px}
+.relay{display:flex;align-items:center;gap:0;margin-top:14px;flex-wrap:wrap}
+.rnode{text-align:center;flex:1;min-width:110px;position:relative}
+.rnode .dot{width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--line);margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:15px}
+.rnode.done .dot{border-color:var(--teal);background:var(--teal-l)}
+.rnode.doing .dot{border-color:var(--gold);background:var(--gold-l);box-shadow:0 0 0 5px rgba(233,162,59,.15)}
+.rnode b{display:block;font-size:12px;color:var(--ink);margin-top:6px}
+.rnode small{font-size:10.5px;color:var(--sub)}
+.rline{flex:0 0 46px;height:3px;background:var(--line);margin-top:16px}
+.rline.done{background:var(--teal)}
+
+/* 弹层 */
+.modal-mask{position:fixed;inset:0;background:rgba(20,30,34,.55);z-index:100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-mask.show{display:flex;animation:fade .2s}
+.modal{width:min(430px,92vw);max-height:86vh;overflow-y:auto;background:#fff;border-radius:18px;padding:24px}
+.modal h3{color:var(--ink);font-size:17px;margin-bottom:4px}
+.modal .msub{font-size:12px;color:var(--sub);margin-bottom:14px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--ink);margin-bottom:5px;font-weight:600}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px;font-family:inherit;background:#FBF9F5}
+.field textarea{resize:vertical;min-height:64px}
+.photo-pick{border:1.5px dashed #C9BFAF;border-radius:12px;padding:18px;text-align:center;color:#A79C8B;font-size:12px;cursor:pointer;background:#FBF9F5}
+.photo-pick.picked{border-color:var(--teal);color:var(--teal);background:var(--teal-l)}
+.btn-main{width:100%;border:none;border-radius:12px;background:var(--red);color:#fff;font-size:14.5px;font-weight:700;padding:12px;cursor:pointer;margin-top:6px}
+.btn-main.teal{background:var(--teal)}
+.quiz-q{margin-bottom:14px}
+.quiz-q b{display:block;font-size:13px;color:var(--ink);margin-bottom:6px}
+.quiz-q label{display:block;font-size:12.5px;color:var(--sub);padding:8px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer}
+.quiz-q label:hover{border-color:var(--teal)}
+.quiz-q label.right{background:var(--teal-l);border-color:var(--teal);color:var(--teal);font-weight:600}
+.quiz-q label.wrong{background:var(--blush);border-color:var(--red);color:var(--red)}
+.sound-wave{display:flex;align-items:center;gap:3px;height:34px;margin:10px 0}
+.sound-wave i{width:4px;border-radius:2px;background:var(--teal);animation:wv 1s infinite ease-in-out}
+.sound-wave i:nth-child(odd){height:12px}.sound-wave i:nth-child(even){height:24px}
+@keyframes wv{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.3)}}
+
+/* toast */
+#toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--ink);color:#fff;
+  padding:11px 22px;border-radius:24px;font-size:13.5px;z-index:200;opacity:0;pointer-events:none;transition:.3s;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast b{color:var(--gold)}
+
+/* ===== 联动 & 升级功能 ===== */
+.tabs button{position:relative}
+.tabs .bd{position:absolute;top:-4px;right:2px;min-width:16px;height:16px;background:#FF4D5E;color:#fff;border-radius:8px;font-size:10px;line-height:16px;padding:0 4px;font-weight:700}
+.kpi b{display:inline-block}
+.bump{animation:bumpA .7s}
+@keyframes bumpA{30%{color:var(--red);transform:scale(1.3)}}
+.fresh{background:var(--blush)!important;animation:freshIn .5s}
+@keyframes freshIn{from{opacity:0;transform:translateX(-8px)}}
+.qgrid{grid-template-columns:repeat(5,1fr)}
+.q i{width:38px;height:38px;font-size:18px}
+.task-card{border:1px solid #F2C9CE;background:linear-gradient(135deg,#FFF6F6,#fff);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:center}
+.task-card .ti{width:40px;height:40px;border-radius:12px;background:var(--blush);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.part-btn{flex:1;border:1.5px solid var(--line);background:#FBF9F5;border-radius:14px;padding:16px 8px;font-size:13px;cursor:pointer;text-align:center;color:var(--ink)}
+.part-btn:hover{border-color:var(--red);background:var(--blush)}
+.part-btn i{font-style:normal;display:block;font-size:26px;margin-bottom:6px}
+.scan{height:120px;border-radius:14px;background:linear-gradient(135deg,#0E1B20,#1E323A);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:40px}
+.scan::after{content:"";position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#5EEAD4,transparent);animation:scanL 1.2s linear infinite}
+@keyframes scanL{0%{top:0}50%{top:calc(100% - 2px)}100%{top:0}}
+.prog{height:8px;background:#EEE5D6;border-radius:4px;overflow:hidden;margin:8px 0}
+.prog i{display:block;height:100%;background:var(--teal);border-radius:4px;transition:width .3s}
+.fac-mask{position:fixed;inset:0;background:#0C1519;z-index:110;display:none;flex-direction:column;color:#DDE8EA}
+.fac-mask.show{display:flex;animation:fade .25s}
+.fac-head{display:flex;align-items:center;gap:12px;padding:16px 22px;background:rgba(18,32,38,.6)}
+.live-dot{width:9px;height:9px;border-radius:50%;background:#FF4D5E;animation:pu 1.2s infinite}
+.fac-video{flex:1;margin:0 22px;border-radius:16px;background:linear-gradient(180deg,#16262D,#1D313A);position:relative;overflow:hidden;min-height:180px}
+.belt{position:absolute;left:0;right:0;height:26px;background:#0F1B20;border-top:3px solid #2C4550}
+.kib{position:absolute;width:14px;height:10px;background:#C98A4B;border-radius:3px;animation:mv 3.6s linear infinite}
+@keyframes mv{from{left:-4%}to{left:104%}}
+.fac-info{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:18px 22px 26px}
+.fac-info .fi{background:#12222A;border-radius:12px;padding:12px;font-size:12px}
+.fac-info b{display:block;font-size:18px;color:#7BE3C8;margin-top:3px}
+.fac-close{margin-left:auto;border:1px solid rgba(255,255,255,.3);background:none;color:#fff;border-radius:20px;padding:6px 16px;cursor:pointer;font-size:12px}
+.feed-st{display:flex;gap:12px;align-items:center;background:#fff;border-radius:14px;padding:12px;margin-bottom:10px;border:1px solid var(--line)}
+.feed-st .fi2{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.meter{flex:1}
+.meter .mt{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub);margin-bottom:4px}
+
+footer{border-top:1px solid var(--line);padding:18px;text-align:center;font-size:11.5px;color:#B5ACA0}
+@media (max-width:900px){
+  .fnote{display:none}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .dash-grid,.pet-grid{grid-template-columns:1fr}
+  .phone{transform:scale(.92);transform-origin:top center}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">🐾 链宠守护<em>演示版</em></div>
+  <nav class="tabs">
+    <button data-tab="resident" class="active">📱 居民端</button>
+    <button data-tab="assoc">📊 协会端</button>
+    <button data-tab="shelter">🏠 救助站端</button>
+  </nav>
+</header>
+
+<main>
+<!-- ================= 居民端 ================= -->
+<section id="tab-resident" class="tab active">
+  <div class="resident-wrap">
+    <div class="fnote"><b><span class="dot"></span>一键上报</b>发现流浪动物受伤或被困，拍张照、选个位置就能上报，处理进度全程可查。</div>
+    <div class="phone"><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>链宠守护</span><span>🔋 5G</span></div>
+      <div class="pbody">
+
+        <!-- 首页 -->
+        <div class="pscreen active" id="ps-home">
+          <div class="apphead">
+            <div class="hi">你好，爱心的邻居 👋</div>
+            <div class="loc">📍 邯郸市 · 丛台区</div>
+          </div>
+          <div class="qgrid">
+            <div class="q" onclick="openReport()"><i>🚨</i>一键上报</div>
+            <div class="q" onclick="go('feed')"><i>🍚</i>投喂地图</div>
+            <div class="q" onclick="go('home');toast('点击地图上的爪印，<b>▶️ 可播放声音</b>')"><i>🔊</i>声音地图</div>
+            <div class="q" onclick="openAI()"><i>🩺</i>AI 兽医</div>
+            <div class="q" onclick="openFactory()"><i>🏭</i>工厂监控</div>
+          </div>
+          <div class="card-m">
+            <div class="mtitle"><b>🔊 流浪动物声音地图</b><span>点击爪印听声音</span></div>
+            <div class="mapbox" id="mapbox">
+              <div class="road" style="left:0;right:0;top:52px;height:14px;border-radius:8px"></div>
+              <div class="road" style="top:0;bottom:0;left:150px;width:16px;border-radius:8px"></div>
+              <div class="mp pulse" style="left:60px;top:30px" onclick="openSound('和平路口','小奶猫','喵喵叫，听起来有点饿 · @早八幸存者 录制','🐈',this)"><i>🐈</i></div>
+              <div class="mp t" style="left:250px;top:80px" onclick="openSound('沁河步道','流浪犬「大黄」','汪汪声，精神状态不错 · @熬夜冠军 录制','🐕',this)"><i>🐕</i></div>
+              <div class="mp g" style="left:110px;top:118px" onclick="openSound('社区花园','三花猫','呼噜声，亲人可触摸 · @柠七七 录制','🐱',this)"><i>🐱</i></div>
+              <div style="position:absolute;right:8px;bottom:6px;font-size:10px;color:#7E969B">数据每 5 分钟更新 · 演示</div>
+            </div>
+          </div>
+          <div class="card-m" id="homeFeed">
+            <div class="mtitle"><b>🔥 最新救助动态</b><span>三端实时同步</span></div>
+            <div class="feed-item"><div class="ava">🐕</div><div><div class="t">「大黄」已被接力护送到康宁救助站</div><div class="d">@修勾护卫队 等 3 位搭子接力 · 行程 12.6 公里 · 全程可追溯</div></div><div class="time">2小时前</div></div>
+            <div class="feed-item"><div class="ava">🐈</div><div><div class="t">「年糕」完成 TNR 绝育手术</div><div class="d">@桃桃乌龙 申请的补贴已通过 · 已放归原社区</div></div><div class="time">昨天</div></div>
+            <div class="feed-item"><div class="ava">🏠</div><div><div class="t">「煤球」成功被领养啦 🎉</div><div class="d">领养人 @脆皮大学生 完成了全部领养问答</div></div><div class="time">2天前</div></div>
+          </div>
+        </div>
+
+        <!-- 投喂地图 -->
+        <div class="pscreen" id="ps-feed">
+          <div class="apphead"><div class="hi">社区投喂网络</div><div class="loc">🍚 投喂地图 · 丛台区</div></div>
+          <div style="padding:14px 14px 0">
+            <div class="feed-st"><div class="fi2" style="background:var(--blush)">⚠️</div>
+              <div class="meter"><div class="mt"><b style="color:var(--ink)">龙湖商圈 · 自动投喂器</b><span style="color:var(--red);font-weight:700">余粮 18% 急需</span></div>
+              <div class="prog"><i style="width:18%;background:var(--red)"></i></div></div>
+              <button class="btn-mini" onclick="feedJoin(this)">报名补充</button></div>
+            <div class="feed-st"><div class="fi2" style="background:var(--teal-l)">🏭</div>
+              <div class="meter"><div class="mt"><b style="color:var(--ink)">怡苑小区东门 · 自动投喂器</b><span style="color:var(--teal)">余粮 62%</span></div>
+              <div class="prog"><i style="width:62%"></i></div></div>
+              <button class="btn-mini" onclick="feedJoin(this)">报名补充</button></div>
+            <div class="feed-st"><div class="fi2" style="background:var(--gold-l)">🥣</div>
+              <div class="meter"><div class="mt"><b style="color:var(--ink)">滨河公园北角 · 共享碗点</b><span style="color:var(--teal)">今日已投喂</span></div>
+              <div class="prog"><i style="width:85%"></i></div></div>
+              <button class="btn-mini ghost" onclick="toast('已预约明早投喂班次（演示）')">预约明早</button></div>
+            <p style="font-size:10.5px;color:#B5ACA0;margin:8px 0 16px">报名「投喂志愿者」可获爱心积分；余粮不足时自动提醒守护团，定制粮由工厂直供。</p>
+          </div>
+        </div>
+
+        <!-- 云认养 -->
+        <div class="pscreen" id="ps-adopt">
+          <div class="adoption-hero">
+            <b>🌐 多人守护团 · 云认养</b>
+            <p>无法带它回家？和 5 位爱心伙伴一起「云守护」奶糖，实时看到它的成长与花费明细。</p>
+            <div class="guard-bar">
+              <div class="row"><span>当前守护人 4 / 6</span><span>¥132 / 月已筹</span></div>
+              <div class="track"><div class="fill"></div></div>
+            </div>
+            <button class="btn-mini" style="margin-top:12px;background:#fff;color:var(--teal)" onclick="toast('已加入守护团！首月 ¥20 随心选（演示）')">加入守护团</button>
+          </div>
+          <div class="card-m petrow">
+            <div class="pet-avatar">🐈</div>
+            <div><div style="font-size:14px;font-weight:700;color:var(--ink)">奶糖 · 橘白猫</div>
+            <div style="font-size:11px;color:var(--sub);margin-top:3px">2 岁 · 已绝育 · 亲人</div></div>
+            <button class="btn-mini" onclick="toast('一对一深度认养申请已提交（演示）')">一对一认养</button>
+          </div>
+          <div class="card-m">
+            <div class="mtitle"><b>📸 奶糖的实时反馈</b><span>透明公示</span></div>
+            <div class="tl">
+              <div class="tli">@奶茶三分甜 云投喂成功 · 早餐吃完，体重 4.2kg ↑0.1</div>
+              <div class="tli">本周驱虫已完成 · 花费 ¥35 已公示，@猫猫虫队长 查账通过</div>
+              <div class="tli">临时寄养看护：节假日系统自动安排寄养家庭</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 领养 -->
+        <div class="pscreen" id="ps-find">
+          <div class="chips">
+            <div class="chip2 active">全部</div><div class="chip2" onclick="toast('筛选：猫咪（演示）')">猫咪</div>
+            <div class="chip2" onclick="toast('筛选：狗狗（演示）')">狗狗</div><div class="chip2" onclick="toast('筛选：已绝育（演示）')">已绝育</div>
+          </div>
+          <div class="adopt-card">
+            <div class="pet-avatar">🐕</div>
+            <div style="flex:1"><b style="font-size:14px;color:var(--ink)">福宝 · 中华田园犬</b>
+              <div style="font-size:11px;color:var(--sub);margin-top:2px">1 岁 · 公 · 康宁救助站</div>
+              <div class="tagline"><em>已免疫</em><em>已绝育</em><em>性格温顺</em></div></div>
+            <button class="btn-mini" onclick="openQuiz('福宝')">申请领养</button>
+          </div>
+          <div class="adopt-card">
+            <div class="pet-avatar">🐈</div>
+            <div style="flex:1"><b style="font-size:14px;color:var(--ink)">雪球 · 临清狮子猫</b>
+              <div style="font-size:11px;color:var(--sub);margin-top:2px">8 个月 · 母 · 康宁救助站</div>
+              <div class="tagline"><em>已免疫</em><em>异瞳高颜值</em><em>粘人</em></div></div>
+            <button class="btn-mini" onclick="openQuiz('雪球')">申请领养</button>
+          </div>
+          <div class="adopt-card">
+            <div class="pet-avatar">🐈‍⬛</div>
+            <div style="flex:1"><b style="font-size:14px;color:var(--ink)">墨墨 · 黑猫</b>
+              <div style="font-size:11px;color:var(--sub);margin-top:2px">2 岁 · 公 · 社区救助点</div>
+              <div class="tagline"><em>已绝育</em><em>安静</em><em>适合上班族</em></div></div>
+            <button class="btn-mini" onclick="openQuiz('墨墨')">申请领养</button>
+          </div>
+          <p style="text-align:center;font-size:10.5px;color:#B5ACA0;margin:10px 0 16px">领养前需通过宠物知识问答，达标方可提交申请</p>
+        </div>
+
+        <!-- 我的 -->
+        <div class="pscreen" id="ps-me">
+          <div class="me-hero">
+            <div class="pt" id="ptNum">128</div>
+            <div class="pl">我的爱心积分</div>
+            <div class="badges"><span>🏅 初心救助人</span><span>🍚 投喂志愿者</span><span>🎓 领养答人</span></div>
+          </div>
+          <div class="card-m">
+            <div class="mtitle"><b>📋 我的上报记录</b><span>处理进度可查</span></div>
+            <div id="reportList">
+              <div class="record"><span><b>和平路口</b> · 小猫求助</span><span class="st">● 已处理</span></div>
+              <div class="record"><span><b>沁河步道</b> · 违规投喂提醒</span><span class="st">● 已受理</span></div>
+            </div>
+          </div>
+          <div class="card-m">
+            <div class="mtitle"><b>🎁 积分兑换</b></div>
+            <div class="feed-item"><div class="ava">🦴</div><div><div class="t">宠物零食试吃装</div><div class="d">80 积分 · 定制粮工厂直发</div></div><button class="btn-mini ghost" onclick="toast('兑换成功！将在 3 个工作日寄出（演示）')">兑换</button></div>
+            <div class="feed-item"><div class="ava">🎖️</div><div><div class="t">爱心纪念徽章</div><div class="d">150 积分 · 爱心文创</div></div><button class="btn-mini ghost" onclick="toast('积分不足，再接再厉！（演示）')">兑换</button></div>
+          </div>
+        </div>
+
+      </div>
+      <div class="pnav">
+        <button class="active" data-p="home" onclick="go('home',this)"><i>🏠</i>首页</button>
+        <button data-p="adopt" onclick="go('adopt',this)"><i>💞</i>云认养</button>
+        <button data-p="find" onclick="go('find',this)"><i>🏡</i>领养</button>
+        <button data-p="me" onclick="go('me',this)"><i>👤</i>我的</button>
+      </div>
+
+      <!-- 声音详情层 -->
+      <div id="soundLayer" style="display:none;position:absolute;inset:0;background:rgba(20,30,34,.55);z-index:20;border-radius:34px;align-items:flex-end">
+        <div style="background:#fff;width:100%;border-radius:22px 22px 34px 34px;padding:20px 18px 26px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:52px;height:52px;border-radius:16px;background:var(--gold-l);display:flex;align-items:center;justify-content:center;font-size:28px" id="sdAva">🐈</div>
+            <div><b style="font-size:15px;color:var(--ink)" id="sdTitle">小奶猫</b>
+            <div style="font-size:11.5px;color:var(--sub)" id="sdDesc">喵喵叫，听起来有点饿</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:12px;background:var(--teal-l);border-radius:12px;padding:10px 14px">
+            <span style="font-size:18px;cursor:pointer" id="sdPlay" onclick="playSnd()">▶️</span>
+            <div class="sound-wave" style="flex:1;margin:0"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <span style="font-size:11px;color:var(--teal)">00:10</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--sub);margin-top:10px" id="sdLoc">📍 和平路口</div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn-main teal" style="margin:0" onclick="closeSound();toast('已通知就近救助站，感谢你的爱心！（演示）')">通知救助站</button>
+            <button class="btn-main" style="margin:0;background:var(--ink)" onclick="closeSound()">关闭</button>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="fnote teal"><b><span class="dot"></span>声音地图 × 云认养</b>录 10 秒声音生成带声音标记的点位，比图文更打动人；云认养支持多人守护团与实时反馈，让无法领养的人也能参与。</div>
+  </div>
+</section>
+
+<!-- ================= 协会端 ================= -->
+<section id="tab-assoc" class="tab">
+  <h2 class="sec">数据看板 <span class="note">本月数据 · 邯郸市丛台区（演示数据）</span></h2>
+  <div class="kpis">
+    <div class="kpi"><b id="kpi1">1,286</b><small>本月上报量（条）</small><span class="up">↑ 18%</span></div>
+    <div class="kpi"><b>92.4%</b><small>48 小时处理率</small><span class="up">↑ 3.1%</span></div>
+    <div class="kpi"><b id="kpi3">317</b><small>累计绝育（TNR）</small><span class="up">↑ 42</span></div>
+    <div class="kpi"><b>27.8%</b><small>平均领养率</small><span class="up">↑ 6.2%</span></div>
+  </div>
+  <div class="dash-grid">
+    <div class="dash">
+      <div class="chart-head"><b style="color:var(--ink)">上报 / 领养趋势（近 6 个月）</b>
+        <div class="legend"><span><i style="background:var(--red)"></i>上报量</span><span><i style="background:var(--teal)"></i>领养量</span></div>
+      </div>
+      <svg viewBox="0 0 560 230" width="100%">
+        <g stroke="#EEE5D6" stroke-width="1">
+          <line x1="40" y1="30" x2="545" y2="30"/><line x1="40" y1="80" x2="545" y2="80"/>
+          <line x1="40" y1="130" x2="545" y2="130"/><line x1="40" y1="180" x2="545" y2="180"/>
+        </g>
+        <text x="8" y="34" font-size="11" fill="#A79C8B">1500</text><text x="14" y="84" font-size="11" fill="#A79C8B">1000</text>
+        <text x="14" y="134" font-size="11" fill="#A79C8B">500</text><text x="20" y="184" font-size="11" fill="#A79C8B">0</text>
+        <polygon points="60,120 165,110 270,95 375,75 480,60 530,45 530,180 60,180" fill="rgba(200,56,74,.08)"/>
+        <polyline points="60,120 165,110 270,95 375,75 480,60 530,45" fill="none" stroke="#C8384A" stroke-width="3" stroke-linecap="round"/>
+        <polyline points="60,165 165,158 270,150 375,140 480,132 530,125" fill="none" stroke="#5E8F86" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 0"/>
+        <g fill="#C8384A"><circle cx="60" cy="120" r="4"/><circle cx="165" cy="110" r="4"/><circle cx="270" cy="95" r="4"/><circle cx="375" cy="75" r="4"/><circle cx="480" cy="60" r="4"/><circle cx="530" cy="45" r="5"/></g>
+        <g fill="#5E8F86"><circle cx="60" cy="165" r="4"/><circle cx="165" cy="158" r="4"/><circle cx="270" cy="150" r="4"/><circle cx="375" cy="140" r="4"/><circle cx="480" cy="132" r="4"/><circle cx="530" cy="125" r="4"/></g>
+        <g font-size="11" fill="#A79C8B" text-anchor="middle">
+          <text x="60" y="205">5月</text><text x="165" y="205">6月</text><text x="270" y="205">7月</text>
+          <text x="375" y="205">8月</text><text x="480" y="205">9月</text><text x="530" y="205">10月</text>
+        </g>
+      </svg>
+      <p style="font-size:11px;color:#B5ACA0;margin-top:6px">演示数据 · 可按街道 / 社区筛选，支撑资源精准调配</p>
+    </div>
+    <div class="dash">
+      <b style="color:var(--ink)">⚠️ 违规预警</b>
+      <div class="warn"><div class="wi">🚫</div><div><b>怡苑小区 3 号楼 · 遗弃宠物疑似</b><p>监控抓拍 · 10-08 21:40 · 已通知网格员核实</p></div></div>
+      <div class="warn"><div class="wi">🗑️</div><div><b>滨河公园 · 违规投喂污染</b><p>居民上报 2 次 · 已派志愿者引导规范投喂</p></div>
+        <button class="btn-s btn-ok" onclick="this.textContent='✓ 已处理';this.disabled=true;this.style.background='#B9CDC9';this.style.color='#fff';toast('预警已办结（演示）')">处理</button></div>
+      <div class="warn"><div class="wi">❓</div><div><b>龙湖商圈 · 疑似虐猫行为举报</b><p>视频佐证已存证 · 转交城管执法协同处理</p></div></div>
+    </div>
+  </div>
+  <div class="dash" style="margin-top:16px">
+    <b style="color:var(--ink)">📡 实时上报流</b>
+    <div id="liveFeed" style="margin-top:6px">
+      <div class="feed-item"><div class="ava">📸</div><div><div class="t">龙湖商圈 · 疑似受伤流浪猫</div><div class="d">居民 @早八幸存者 上报 · 已派志愿者核实</div></div><div class="time">26分钟前</div></div>
+      <div class="feed-item"><div class="ava">🍚</div><div><div class="t">怡苑小区 · 投喂点余粮预警</div><div class="d">系统已自动提醒投喂搭子群补充</div></div><div class="time">1小时前</div></div>
+    </div>
+  </div>
+  <h2 class="sec" id="secTnr">TNR 补贴审批 <span class="note">绝育证明线上审核，补贴直达申请人（演示数据）</span></h2>
+  <div class="dash">
+    <table>
+      <tr><th>申请人</th><th>动物</th><th>实施医院</th><th>证明材料</th><th>申请金额</th><th>状态</th><th>操作</th></tr>
+      <tr><td>王*灵</td><td>三花猫 ×1</td><td>安安宠物医院</td><td>手术记录 + 现场照片</td><td>¥120</td><td><span class="st-pill st-wait">待审核</span></td><td class="btn-row"><button class="btn-s btn-ok" onclick="review(this,1)">通过</button><button class="btn-s btn-no" onclick="review(this,0)">驳回</button></td></tr>
+      <tr><td>李*明</td><td>田园犬 ×1</td><td>瑞鹏宠物中心</td><td>手术记录 + 现场照片</td><td>¥150</td><td><span class="st-pill st-wait">待审核</span></td><td class="btn-row"><button class="btn-s btn-ok" onclick="review(this,1)">通过</button><button class="btn-s btn-no" onclick="review(this,0)">驳回</button></td></tr>
+      <tr><td>张*华</td><td>狸花猫 ×2</td><td>安安宠物医院</td><td>手术记录 + 现场照片</td><td>¥240</td><td><span class="st-pill st-ok">已发放</span></td><td>—</td></tr>
+      <tr><td>刘*婷</td><td>白猫 ×1</td><td>宠爱国际</td><td>材料不完整</td><td>¥120</td><td><span class="st-pill st-no">已驳回</span></td><td>—</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ================= 救助站端 ================= -->
+<section id="tab-shelter" class="tab">
+  <h2 class="sec">集群健康警报 <span class="note">基于全部动物电子档案自动分析（演示数据）</span></h2>
+  <div class="alert-banner">
+    <div class="alert-card" id="alert1">
+      <div class="ah">🔴 疑似传染病聚集 · A 区猫舍</div>
+      <p>48 小时内连续 <b>3</b> 只出现呕吐症状，已触发疑似传染病预警。建议：立即隔离 A 区、环境消毒、通知驻站兽医。</p>
+      <button class="btn-s btn-ok" onclick="handleAlert(this)">一键推送处置流程</button>
+    </div>
+    <div class="alert-card" id="alert2">
+      <div class="ah">🟡 个体健康异常 · 「福宝」</div>
+      <p>连续 5 日进食量下降 40%，体重 ↓0.8kg，AI 初步建议排查消化道疾病，已预约合作医院。</p>
+      <button class="btn-s btn-ok" onclick="handleAlert(this)">标记已跟进</button>
+    </div>
+  </div>
+  <h2 class="sec">来自居民端的实时任务 <span class="note">上报后自动派单到就近站点 · 去居民端提交一条上报试试</span></h2>
+  <div id="newTasks"></div>
+  <h2 class="sec">接力救助 · 进行中 <span class="note">超出个人能力时，多方接力护送（演示数据）</span></h2>
+  <div class="dash">
+    <b style="color:var(--ink)">任务 R-1024 · 受伤流浪犬「旺财」 邯郸大学城 → 康宁救助站（16.8 km）</b>
+    <div class="relay">
+      <div class="rnode done"><div class="dot">📢</div><b>发布需求</b><small>志愿者 @修勾护卫队 · 09:12</small></div>
+      <div class="rline done"></div>
+      <div class="rnode done"><div class="dot">🚗</div><b>公益车队接单</b><small>冀D·车主联盟 · 09:30</small></div>
+      <div class="rline done"></div>
+      <div class="rnode doing"><div class="dot">🏥</div><b>中途医院处置</b><small>包扎止血 · 进行中</small></div>
+      <div class="rline"></div>
+      <div class="rnode"><div class="dot">🏠</div><b>送达救助站</b><small>待完成</small></div>
+    </div>
+    <p style="font-size:11px;color:#B5ACA0;margin-top:14px">各节点完成状态实时同步给发布人，全程可追溯</p>
+  </div>
+  <h2 class="sec">动物电子档案 <span class="note">一键生成领养海报 · AI 智能匹配领养人（演示数据）</span></h2>
+  <div class="pet-grid">
+    <div class="pet-card"><div class="pava">🐕</div><b>福宝</b><small>田园犬 · 1岁 · 已免疫绝育</small>
+      <div class="tagline"><em>温顺</em><em>会握手</em></div>
+      <button class="btn-mini ghost" style="margin:10px auto 0" onclick="toast('已生成「福宝」领养海报（演示）')">生成领养海报</button></div>
+    <div class="pet-card"><div class="pava">🐈</div><b>雪球</b><small>狮子猫 · 8月 · 已免疫</small>
+      <div class="tagline"><em>异瞳</em><em>粘人</em></div>
+      <button class="btn-mini ghost" style="margin:10px auto 0" onclick="toast('AI 匹配到 3 位高契合领养人（演示）')">AI 匹配领养人</button></div>
+    <div class="pet-card"><div class="pava">🐈‍⬛</div><b>墨墨</b><small>黑猫 · 2岁 · 已绝育</small>
+      <div class="tagline"><em>安静</em><em>适合上班族</em></div>
+      <button class="btn-mini ghost" style="margin:10px auto 0" onclick="toast('已生成「墨墨」领养海报（演示）')">生成领养海报</button></div>
+  </div>
+</section>
+</main>
+
+<!-- AI 兽医弹窗 -->
+<div class="modal-mask" id="aiMask">
+  <div class="modal">
+    <div id="aiStep1">
+      <h3>🩺 AI 兽医 · 远程支援</h3>
+      <div class="msub">选择检查部位，拍摄 10 秒视频即可初步识别疑似疾病</div>
+      <div style="display:flex;gap:10px">
+        <button class="part-btn" onclick="aiShot('eye')"><i>👁️</i>眼部</button>
+        <button class="part-btn" onclick="aiShot('skin')"><i>🧴</i>皮肤</button>
+        <button class="part-btn" onclick="aiShot('gait')"><i>🐾</i>步态</button>
+      </div>
+    </div>
+    <div id="aiStep2" style="display:none">
+      <h3>📹 视频上传中</h3>
+      <div class="prog"><i id="aiBar" style="width:0%"></i></div>
+      <div class="msub" id="aiTip">正在上传视频…</div>
+    </div>
+    <div id="aiStep3" style="display:none">
+      <h3>🧠 AI 影像识别</h3>
+      <div class="scan" id="aiScan">👁️</div>
+      <div class="msub" style="margin-top:10px">模型分析中：比对 12,000+ 病例库…</div>
+    </div>
+    <div id="aiStep4" style="display:none">
+      <h3 id="aiResT">识别结果</h3>
+      <div id="aiResBody"></div>
+      <button class="btn-main teal" onclick="aiTransfer()">转接合作兽医（视频问诊）</button>
+      <button class="btn-main" style="background:var(--ink)" onclick="closeAI()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 工厂实时监控 -->
+<div class="fac-mask" id="facMask">
+  <div class="fac-head"><span class="live-dot"></span><b>定制粮工厂 · 4 号生产线实时监控</b><span style="font-size:11px;color:#8FB0B8">山东乐宝 · ISO22000 车间</span><button class="fac-close" onclick="closeFactory()">退出监控 ✕</button></div>
+  <div class="fac-video">
+    <div class="belt" style="bottom:60px"></div>
+    <div class="belt" style="bottom:110px"></div>
+    <div class="kib" style="bottom:72px"></div>
+    <div class="kib" style="bottom:72px;animation-delay:1.2s"></div>
+    <div class="kib" style="bottom:72px;animation-delay:2.4s"></div>
+    <div class="kib" style="bottom:122px;animation-duration:4.4s;animation-delay:.6s"></div>
+    <div class="kib" style="bottom:122px;animation-duration:4.4s;animation-delay:2.8s"></div>
+    <div style="position:absolute;top:14px;left:16px;font-size:11px;color:#7BE3C8">CAM-04 · 膨化成型工序</div>
+    <div style="position:absolute;top:14px;right:16px;font-size:11px;color:#FF4D5E">● REC</div>
+    <div style="position:absolute;bottom:16px;left:16px;font-size:11px;color:#8FB0B8">订单 #D2609 · 低敏处方粮 2.4 吨 · 生产进度 68%</div>
+  </div>
+  <div class="fac-info">
+    <div class="fi">车间温度<b>24.1℃</b></div>
+    <div class="fi">车间湿度<b>46%</b></div>
+    <div class="fi">本批次完成<b>68%</b></div>
+    <div class="fi">预计出厂<b>10-12 09:00</b></div>
+  </div>
+</div>
+
+<!-- 上报弹窗 -->
+<div class="modal-mask" id="reportMask">
+  <div class="modal">
+    <h3>🚨 一键上报</h3>
+    <div class="msub">位置 + 照片 + 描述，将自动推送属地城管与就近救助站</div>
+    <div class="field"><label>动物类型</label>
+      <select id="rpType"><option>流浪猫</option><option>流浪犬</option><option>受伤 / 被困动物</option><option>违规行为举报</option></select></div>
+    <div class="field"><label>位置</label><input id="rpLoc" value="邯郸市丛台区 · 和平路 39 号附近"></div>
+    <div class="field"><label>现场照片</label>
+      <div class="photo-pick" id="rpPhoto" onclick="this.classList.add('picked');this.textContent='✅ 已添加照片IMG_2026.jpg（演示）'">📷 点击添加照片（演示直接模拟成功）</div></div>
+    <div class="field"><label>情况描述</label><textarea id="rpDesc" placeholder="例如：路边纸箱里有一窝小奶猫，母猫不在，天气转冷…"></textarea></div>
+    <button class="btn-main" onclick="submitReport()">提交上报（+10 积分）</button>
+  </div>
+</div>
+
+<!-- 领养问答弹窗 -->
+<div class="modal-mask" id="quizMask">
+  <div class="modal">
+    <h3>🎓 领养知识问答</h3>
+    <div class="msub">答对 3 题即可提交领养申请 · 目标：<b id="quizPet" style="color:var(--red)">福宝</b></div>
+    <div class="quiz-q"><b>1. 领养后宠物生病，正确的做法是？</b>
+      <label data-ok="1">及时送正规宠物医院，不拖延不弃养</label>
+      <label>网上随便买点药喂一喂</label>
+      <label>治起来贵就放归街头</label></div>
+    <div class="quiz-q"><b>2. 关于「TNR」，下列说法正确的是？</b>
+      <label>抓回去关起来养</label>
+      <label data-ok="1">诱捕-绝育-放归，人道控制流浪数量</label>
+      <label>驱赶出社区就没事了</label></div>
+    <div class="quiz-q"><b>3. 领养代替购买的意义是？</b>
+      <label>品种猫更值得养</label>
+      <label>领养不花钱所以随便养养</label>
+      <label data-ok="1">给流浪的生命一个家，减少无序繁殖</label></div>
+    <button class="btn-main teal" onclick="checkQuiz(this)">提交答案</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<footer>链宠守护 · 全链条流浪动物救助帮扶平台 — 演示版 · 所有数据均为模拟，仅供挑战杯路演展示 · 河北工程大学</footer>
+
+<script>
+function toast(html){const t=document.getElementById('toast');t.innerHTML=html;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400)}
+/* ===== 全局状态 & 三端联动 ===== */
+const S={reports:1286,tnr:317};
+function setBadge(tab,n){const b=document.querySelector('.tabs button[data-tab="'+tab+'"]');if(!b)return;
+ let d=b.querySelector('.bd');
+ if(!n){if(d)d.remove();return}
+ if(!d){d=document.createElement('span');d.className='bd';b.appendChild(d)}d.textContent=n}
+function bumpKpi(id,delta){const el=document.getElementById(id);if(!el)return;
+ el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
+ el.textContent=(parseInt(el.textContent.replace(/,/g,''))+delta).toLocaleString()}
+function liveAdd(title,desc){const box=document.getElementById('liveFeed');if(!box)return;
+ const d=document.createElement('div');d.className='feed-item fresh';
+ d.innerHTML='<div class="ava">🆕</div><div><div class="t">'+title+'</div><div class="d">'+desc+'</div></div><div class="time">刚刚</div>';
+ box.prepend(d)}
+function homeFeedAdd(ava,title,desc){const box=document.getElementById('homeFeed');if(!box)return;
+ const d=document.createElement('div');d.className='feed-item fresh';
+ d.innerHTML='<div class="ava">'+ava+'</div><div><div class="t">'+title+'</div><div class="d">'+desc+'</div></div><div class="time">刚刚</div>';
+ box.prepend(d)}
+function taskAdd(loc,type){const box=document.getElementById('newTasks');if(!box)return;
+ const d=document.createElement('div');d.className='task-card';
+ d.innerHTML='<div class="ti">🆘</div><div style="flex:1"><b style="font-size:13px;color:var(--ink)">新上报任务 · '+type+'</b><div style="font-size:11.5px;color:var(--sub);margin-top:2px">'+loc+' · 来自居民端，等待受理</div></div>';
+ const b=document.createElement('button');b.className='btn-s btn-ok';b.textContent='受理';
+ b.onclick=()=>{b.textContent='✓ 已受理';b.disabled=true;b.style.background='#B9CDC9';b.style.color='#fff';
+  const rec=document.querySelector('#reportList .record .st');if(rec)rec.textContent='● 已受理';
+  setTimeout(()=>d.remove(),900);toast('已受理，状态已同步回居民端「我的上报」（演示）')};
+ d.appendChild(b);box.prepend(d)}
+/* ===== 合成音效（Web Audio） ===== */
+let AC;
+function ac(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();return AC}
+function meow(){const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();
+ o.type='sawtooth';o.frequency.setValueAtTime(880,t);o.frequency.exponentialRampToValueAtTime(520,t+.15);
+ o.frequency.exponentialRampToValueAtTime(720,t+.32);o.frequency.exponentialRampToValueAtTime(430,t+.55);
+ g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.14,t+.05);g.gain.exponentialRampToValueAtTime(.0001,t+.6);
+ o.connect(g).connect(c.destination);o.start(t);o.stop(t+.65)}
+function bark(){const c=ac(),t=c.currentTime;
+ [0,.2].forEach(dt=>{const o=c.createOscillator(),g=c.createGain();
+  o.type='square';o.frequency.setValueAtTime(320,t+dt);o.frequency.exponentialRampToValueAtTime(150,t+dt+.12);
+  g.gain.setValueAtTime(.0001,t+dt);g.gain.exponentialRampToValueAtTime(.16,t+dt+.02);g.gain.exponentialRampToValueAtTime(.0001,t+dt+.16);
+  o.connect(g).connect(c.destination);o.start(t+dt);o.stop(t+dt+.2)})}
+function playSnd(){const t=window._snd||'meow';
+ try{t==='bark'?bark():meow();toast('🔊 播放叫声（Web Audio 合成演示音效）')}catch(e){toast('当前浏览器不支持音频播放')}}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');setBadge(b.dataset.tab,0);
+  document.getElementById('tab-'+b.dataset.tab).classList.add('active')});
+function go(name,btn){
+  document.querySelectorAll('.pscreen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('ps-'+name).classList.add('active');
+  document.querySelectorAll('.pnav button').forEach(x=>x.classList.remove('active'));
+  if(btn)btn.classList.add('active')}
+/* 声音地图 */
+function openSound(loc,name,desc,ava,el){
+  document.querySelectorAll('.mp').forEach(m=>m.classList.remove('pulse'));el.classList.add('pulse');
+  document.getElementById('sdTitle').textContent=name;
+  document.getElementById('sdDesc').textContent=desc;
+  document.getElementById('sdAva').textContent=ava;
+  document.getElementById('sdLoc').textContent='📍 '+loc;
+  window._snd=(ava==='🐕')?'bark':'meow';
+  const l=document.getElementById('soundLayer');l.style.display='flex'}
+function closeSound(){document.getElementById('soundLayer').style.display='none'}
+/* 上报 */
+function openReport(){document.getElementById('reportMask').classList.add('show')}
+function submitReport(){
+  const loc=document.getElementById('rpLoc').value||'未命名位置';
+  const type=document.getElementById('rpType').value;
+  const div=document.createElement('div');div.className='record';
+  div.innerHTML='<span><b>'+loc.split('·').pop().trim()+'</b> · '+type+'</span><span class="st">● 待受理</span>';
+  document.getElementById('reportList').prepend(div);
+  const pt=document.getElementById('ptNum');pt.textContent=parseInt(pt.textContent)+10;
+  document.getElementById('reportMask').classList.remove('show');
+  bumpKpi('kpi1',1);
+  liveAdd(loc.split('·').pop().trim()+' · '+type+'求助','居民 @干饭第一名 上报 · 自动派单至就近救助站');
+  homeFeedAdd('🆕','你的上报已受理推送','属地城管与就近救助站已收到，处理进度可查');
+  setBadge('assoc',1);setBadge('shelter',1);taskAdd(loc,type);
+  toast('上报成功！<b>已实时同步协会端与救助站</b> · +10 积分')}
+/* 问答 */
+function openQuiz(name){document.getElementById('quizPet').textContent=name;document.getElementById('quizMask').classList.add('show')}
+function checkQuiz(btn){
+  let right=0,total=0;
+  document.querySelectorAll('#quizMask .quiz-q').forEach(q=>{
+    total++;const pick=q.querySelector('label[style*="outline"], label.sel')||null;
+    const chosen=q.querySelectorAll('label');
+    let picked=false;
+    chosen.forEach(l=>{if(l.dataset.picked){picked=l.dataset.ok==='1'}});
+    if(!picked){toast('还有题目没作答哦');return}
+    chosen.forEach(l=>{l.classList.remove('right','wrong');if(l.dataset.picked){l.classList.add(l.dataset.ok==='1'?'right':'wrong')}});
+    if(picked)right++});
+  if(right===total){setTimeout(()=>{document.getElementById('quizMask').classList.remove('show');
+    setBadge('shelter',1);
+    homeFeedAdd('🎓','新的领养申请已通过问答','救助站将在 24 小时内联系申请人（演示）');
+    toast('🎉 问答通过！领养申请已提交并<b>同步至救助站</b>（演示）')},600)}
+}
+document.querySelectorAll('#quizMask label').forEach(l=>l.onclick=()=>{
+  l.parentElement.querySelectorAll('label').forEach(x=>{x.style.outline='';x.classList.remove('sel');delete x.dataset.picked});
+  l.style.outline='2px solid var(--teal)';l.classList.add('sel');l.dataset.picked='1'});
+/* TNR 审核 */
+function review(btn,pass){
+  const st=btn.closest('tr').querySelector('.st-pill');
+  st.className='st-pill '+(pass?'st-ok':'st-no');
+  st.textContent=pass?'已发放':'已驳回';
+  btn.parentElement.innerHTML='—';
+  if(pass){S.tnr++;bumpKpi('kpi3',1);
+    liveAdd('TNR 补贴发放','绝育补贴已直达申请人 · 全程留痕');
+    homeFeedAdd('🐱','「三花猫」TNR 补贴已发放','绝育完成 · 已放归原社区（协会端审批通过）')}
+  toast(pass?'审核通过，补贴直达申请人，<b>三端已同步</b>（演示）':'已驳回：材料不完整，已通知补充（演示）')}
+/* 健康警报 */
+function handleAlert(btn){btn.textContent='✓ 已推送处置流程';btn.disabled=true;
+  btn.style.background='#B9CDC9';btn.style.color='#fff';
+  liveAdd('健康警报已处置','隔离与消毒流程已推送至值班员');
+  toast('处置流程已推送，同步协会端备案（演示）')}
+/* ===== AI 兽医 ===== */
+function openAI(){document.getElementById('aiMask').classList.add('show');aiTo(1)}
+function aiTo(n){for(let i=1;i<=4;i++)document.getElementById('aiStep'+i).style.display=i===n?'block':'none'}
+function aiShot(part){
+  const names={eye:'眼部',skin:'皮肤',gait:'步态'},icon={eye:'👁️',skin:'🧴',gait:'🐾'};
+  aiTo(2);document.getElementById('aiTip').textContent='正在上传'+names[part]+'视频…';
+  const bar=document.getElementById('aiBar');let p=0;bar.style.width='0%';
+  const h=setInterval(()=>{p+=14;bar.style.width=Math.min(p,100)+'%';
+    if(p>=100){clearInterval(h);aiTo(3);document.getElementById('aiScan').textContent=icon[part];
+      setTimeout(()=>aiResult(part),1600)}},180)}
+function aiResult(part){
+  const R={eye:['疑似轻度结膜炎','置信度 82%','建议：清理分泌物、佩戴伊丽莎白圈防止抓挠，3 日内无好转请就医。'],
+    skin:['疑似真菌性皮肤病（局部）','置信度 76%','建议：患处剃毛喷药、环境消毒，避免与其他动物接触。'],
+    gait:['疑似后肢软组织挫伤','置信度 71%','建议：限制剧烈活动，观察 48 小时，持续跛行请拍摄 X 光。']};
+  const r=R[part];
+  document.getElementById('aiResT').textContent='🧠 识别结果：'+r[0];
+  document.getElementById('aiResBody').innerHTML='<div class="msub" style="font-size:13px;color:var(--red);font-weight:700">'+r[1]+'</div><p style="font-size:12.5px;color:var(--sub);line-height:1.7;margin-bottom:14px">'+r[2]+'<br>已根据上报定位推荐 2 家合作宠物医院。</p>';
+  aiTo(4)}
+function aiTransfer(){closeAI();toast('已转接「安安宠物医院」值班兽医，视频问诊排队中（演示）')}
+function closeAI(){document.getElementById('aiMask').classList.remove('show')}
+/* ===== 工厂监控 ===== */
+function openFactory(){document.getElementById('facMask').classList.add('show')}
+function closeFactory(){document.getElementById('facMask').classList.remove('show')}
+/* ===== 投喂地图 ===== */
+function feedJoin(btn){btn.textContent='✓ 已报名 · 明早 8:00';btn.disabled=true;
+  btn.style.background='#B9CDC9';btn.style.color='#fff';
+  const pt=document.getElementById('ptNum');pt.textContent=parseInt(pt.textContent)+5;
+  toast('报名成功！<b>+5 积分</b>，余粮不足时将提醒你（演示）')}
+/* ESC 关闭弹层 */
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){
+  document.querySelectorAll('.modal-mask').forEach(m=>m.classList.remove('show'));closeSound();closeFactory()}});
+document.querySelectorAll('.modal-mask').forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove('show')});
+/* 支持 hash 直达对应端/屏（用于截图与分享） */
+const _h=location.hash.slice(1);
+if(['resident','assoc','shelter'].includes(_h)){const tb=document.querySelector('.tabs button[data-tab="'+_h+'"]');if(tb)tb.click()}
+else if(['adopt','find','feed'].includes(_h)){go(_h)}
+else if(_h==='tnr'){const tb=document.querySelector('.tabs button[data-tab="assoc"]');if(tb)tb.click();
+  setTimeout(()=>{const el=document.getElementById('secTnr');el&&el.scrollIntoView({block:'start'})},400)}
+</script>
+</body>
+</html>
