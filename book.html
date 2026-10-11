@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>书舟 · 扫码卖书 10 分钟楼下拿书</title>
+<style>
+:root{
+  --deep:#1B4332; --mid:#2D6A4F; --bar:#52B788; --mint:#95D5B2;
+  --pale:#D8F3DC; --bg:#FAFCF8; --card:#FFFFFF; --line:#E3EFE7;
+  --gold:#C47A1C; --text:#28382F; --sub:#6B7F74;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#EAF2EC;font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);max-width:430px;margin:0 auto;min-height:100vh;position:relative}
+
+/* 顶部 */
+.head{background:linear-gradient(135deg,var(--deep) 0%,var(--mid) 60%,#3A8A63 100%);padding:18px 18px 58px;border-radius:0 0 26px 26px;color:#fff;position:relative;overflow:hidden}
+.head::after{content:"";position:absolute;right:-30px;top:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08)}
+.head::before{content:"";position:absolute;right:20px;top:38px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.07)}
+.brand{display:flex;align-items:center;gap:8px;font-size:19px;font-weight:800;letter-spacing:1px}
+.brand .logo{width:30px;height:30px;background:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--mid);font-size:17px;font-weight:900}
+.brand em{font-style:normal;font-size:10px;background:rgba(255,255,255,.2);border-radius:12px;padding:2px 8px;margin-left:4px;font-weight:400}
+.hi{font-size:12px;opacity:.85;margin-top:12px}
+.loc{font-size:16px;font-weight:700;margin-top:3px}
+.scanbar{position:absolute;left:16px;right:16px;top:104px;background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(27,67,50,.16);padding:14px;display:flex;align-items:center;gap:12px}
+.scanbar .ic{width:44px;height:44px;border-radius:13px;background:var(--pale);display:flex;align-items:center;justify-content:center;font-size:22px}
+.scanbar b{font-size:15px;color:var(--deep);display:block}
+.scanbar span{font-size:11px;color:var(--sub)}
+.scanbar .go{margin-left:auto;background:var(--mid);color:#fff;font-size:13px;font-weight:700;border:none;border-radius:20px;padding:9px 16px}
+
+main{padding:52px 14px 78px}
+.sec{font-size:16px;font-weight:800;color:var(--deep);margin:20px 2px 10px;display:flex;align-items:center;gap:6px}
+.sec::before{content:"";width:4px;height:15px;background:var(--bar);border-radius:2px}
+.sec span{margin-left:auto;font-size:11px;color:var(--sub);font-weight:400}
+
+/* 快捷入口 */
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:#fff;border-radius:16px;padding:14px 4px;box-shadow:0 3px 12px rgba(27,67,50,.06)}
+.q{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--text)}
+.q i{font-style:normal;width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:21px}
+.q:nth-child(1) i{background:var(--pale)} .q:nth-child(2) i{background:#FDF3E2}
+.q:nth-child(3) i{background:#E8F1FB} .q:nth-child(4) i{background:#FBEAEA}
+
+/* 书卡 */
+.book{display:flex;gap:11px;background:#fff;border-radius:15px;padding:12px;margin-bottom:10px;box-shadow:0 3px 12px rgba(27,67,50,.06)}
+.cover{width:62px;height:84px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;line-height:1.3;text-align:center;padding:6px}
+.b1{background:linear-gradient(150deg,#2D6A4F,#52B788)} .b2{background:linear-gradient(150deg,#C47A1C,#E8A94E)}
+.b3{background:linear-gradient(150deg,#4472AB,#6F9BD1)} .b4{background:linear-gradient(150deg,#8A5AAB,#B08CCB)}
+.book .t{font-size:14.5px;font-weight:700;color:var(--deep)}
+.book .m{font-size:11px;color:var(--sub);margin-top:3px;line-height:1.5}
+.tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.tags em{font-style:normal;font-size:10px;background:var(--pale);color:var(--mid);border-radius:9px;padding:2px 8px}
+.tags em.g{background:#FDF3E2;color:var(--gold)}
+.price{margin-left:auto;text-align:right;flex-shrink:0}
+.price b{font-size:16px;color:var(--gold)}
+.price span{display:block;font-size:10px;color:var(--sub);margin-top:2px}
+
+/* 自提点 */
+.point{background:#fff;border-radius:15px;padding:13px 14px;box-shadow:0 3px 12px rgba(27,67,50,.06);display:flex;align-items:center;gap:11px}
+.point .dot{width:38px;height:38px;border-radius:12px;background:var(--pale);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.point b{font-size:13.5px;color:var(--deep);display:block}
+.point span{font-size:11px;color:var(--sub)}
+.point .st{margin-left:auto;font-size:11px;color:var(--bar);font-weight:700;background:var(--pale);border-radius:10px;padding:4px 10px;flex-shrink:0}
+
+/* ===== 卖书流程页 ===== */
+.page{display:none}.page.active{display:block;animation:fade .22s}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stepbar{display:flex;align-items:center;gap:7px;padding:14px 4px 4px}
+.stepbar .n{width:24px;height:24px;border-radius:50%;background:var(--mid);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.stepbar .n.off{background:#DCE7DF;color:#8AA295}
+.stepbar .ln{flex:1;height:2px;background:#DCE7DF;border-radius:1px}
+.stepbar .lb{font-size:11px;color:var(--sub);margin-left:2px}
+识别-card{margin:14px 0}
+.bignum{font-size:15px;font-weight:800;color:var(--deep)}
+.grade{display:flex;gap:10px;margin:12px 0}
+.grade .g{flex:1;background:#fff;border:2px solid var(--line);border-radius:15px;padding:14px 8px;text-align:center;cursor:pointer;transition:.15s}
+.grade .g.on{border-color:var(--mid);background:var(--pale);box-shadow:0 4px 14px rgba(45,106,79,.15)}
+.grade .g i{font-style:normal;font-size:26px;display:block}
+.grade .g b{font-size:14px;color:var(--deep);display:block;margin-top:6px}
+.grade .g span{font-size:10.5px;color:var(--sub);display:block;margin-top:3px}
+.grade .g .p{font-size:17px;font-weight:800;color:var(--gold);margin-top:6px;display:block}
+.estbox{background:linear-gradient(135deg,var(--deep),var(--mid));border-radius:18px;padding:18px;color:#fff;text-align:center;margin-top:14px}
+.estbox .lb{font-size:12px;opacity:.85}
+.estbox .v{font-size:34px;font-weight:900;margin-top:4px}
+.estbox .v small{font-size:15px;font-weight:600}
+.estbox .tip{font-size:11px;opacity:.8;margin-top:6px}
+.btn{display:block;width:100%;border:none;border-radius:24px;background:var(--mid);color:#fff;font-size:15.5px;font-weight:800;padding:14px;margin-top:16px;cursor:pointer;box-shadow:0 6px 18px rgba(45,106,79,.3)}
+.btn.ghost{background:#fff;color:var(--mid);border:1.6px solid var(--mid);box-shadow:none;margin-top:10px}
+.okwrap{text-align:center;padding:40px 20px 20px}
+.okwrap .ok{width:84px;height:84px;border-radius:50%;background:var(--pale);display:flex;align-items:center;justify-content:center;font-size:42px;margin:0 auto 16px}
+.okwrap h3{font-size:19px;color:var(--deep)}
+.okwrap p{font-size:12.5px;color:var(--sub);margin-top:8px;line-height:1.7}
+.okcard{background:#fff;border-radius:15px;padding:14px;margin-top:18px;text-align:left;box-shadow:0 3px 12px rgba(27,67,50,.06)}
+.okcard .row{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.okcard .row:last-child{border:none}
+.okcard .row b{color:var(--deep)}
+.okcard .row .money{color:var(--gold);font-weight:800;font-size:15px}
+
+/* 预订 */
+.resv{background:#fff;border-radius:15px;padding:13px;margin-bottom:10px;box-shadow:0 3px 12px rgba(27,67,50,.06)}
+.resv .top{display:flex;align-items:center}
+.resv .t{font-size:14px;font-weight:700;color:var(--deep)}
+.resv .lock{margin-left:auto;font-size:10.5px;color:var(--bar);background:var(--pale);border-radius:9px;padding:3px 9px;font-weight:700}
+.resv .m{font-size:11.5px;color:var(--sub);margin-top:5px;line-height:1.6}
+.resv .row2{display:flex;align-items:center;margin-top:9px;gap:8px}
+.resv .price2{font-size:15px;font-weight:800;color:var(--gold)}
+.resv .price2 small{font-size:10.5px;color:var(--sub);font-weight:400;text-decoration:line-through;margin-left:4px}
+.resv .btn2{margin-left:auto;border:none;background:var(--mid);color:#fff;font-size:12px;font-weight:700;border-radius:16px;padding:7px 15px}
+
+/* 我的 */
+.me{background:linear-gradient(135deg,var(--deep),var(--mid));border-radius:18px;padding:18px;color:#fff;margin-bottom:14px}
+.me .pt{font-size:30px;font-weight:900}
+.me .pl{font-size:11px;opacity:.85;margin-top:2px}
+.badges{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.badges span{font-size:10.5px;background:rgba(255,255,255,.16);border-radius:11px;padding:4px 10px}
+.card{background:#fff;border-radius:15px;padding:4px 14px;box-shadow:0 3px 12px rgba(27,67,50,.06)}
+.card .row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:13px 0;border-bottom:1px solid var(--line)}
+.card .row:last-child{border:none}
+.card .row i{font-style:normal;margin-right:8px}
+.card .row .r{color:var(--sub);font-size:11.5px}
+.card .row .r.g{color:var(--bar);font-weight:700}
+
+/* 底部导航 */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:1px solid var(--line);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;border:none;background:none;font-size:10.5px;color:#9AAB9F;padding:9px 0 8px;cursor:pointer}
+.nav button i{font-style:normal;display:block;font-size:21px;margin-bottom:2px}
+.nav button.on{color:var(--mid);font-weight:800}
+.wm{position:fixed;top:10px;right:12px;z-index:60;font-size:9px;color:rgba(255,255,255,.75);background:rgba(0,0,0,.12);border-radius:8px;padding:2px 7px;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="wm">演示版</div>
+
+<!-- 首页 -->
+<div class="page active" id="pg-home">
+  <div class="head">
+    <div class="brand"><div class="logo">书</div>书舟<em>教材循环</em></div>
+    <div class="hi">早上好，张同学</div>
+    <div class="loc">🏠 第一自提点 · 竹园 3 号楼楼下</div>
+  </div>
+  <div class="scanbar">
+    <div class="ic">📷</div>
+    <div><b>扫 ISBN 卖书</b><span>背面条形码对准，3 秒出价</span></div>
+    <button class="go" onclick="go('scan')">去卖书</button>
+  </div>
+  <main>
+    <div class="qgrid">
+      <div class="q" onclick="go('scan')"><i>📷</i>扫码卖书</div>
+      <div class="q" onclick="go('resv')"><i>📚</i>教材预订</div>
+      <div class="q"><i>🗺️</i>自提点</div>
+      <div class="q" onclick="go('me')"><i>🌱</i>我的减碳</div>
+    </div>
+
+    <div class="sec">开学热订 <span>提前订 · 锁二手价</span></div>
+    <div class="book">
+      <div class="cover b1">高等<br>数学</div>
+      <div style="flex:1">
+        <div class="t">高等数学（上册）第七版</div>
+        <div class="m">同济大学数学系 · 高等教育出版社<br>全校 12 个专业下学期在用</div>
+        <div class="tags"><em>九成新</em><em class="g">锁价 18 元</em><em>已订 214 人</em></div>
+      </div>
+      <div class="price"><b>¥18</b><span>新书 ¥55.6</span></div>
+    </div>
+    <div class="book">
+      <div class="cover b3">线性<br>代数</div>
+      <div style="flex:1">
+        <div class="t">线性代数 第六版</div>
+        <div class="m">同济大学数学系 · 高等教育出版社<br>统计 / 机械 / 电气专业通用</div>
+        <div class="tags"><em>九成新</em><em class="g">锁价 15 元</em><em>已订 186 人</em></div>
+      </div>
+      <div class="price"><b>¥15</b><span>新书 ¥45</span></div>
+    </div>
+
+    <div class="sec">楼下自提点 <span>查看全部 ›</span></div>
+    <div class="point">
+      <div class="dot">🏫</div>
+      <div><b>第一自提点 · 竹园 3 号楼</b><span>今日可取 26 本 · 距你 120m</span></div>
+      <div class="st">营业中</div>
+    </div>
+    <div class="point" style="margin-top:9px">
+      <div class="dot">🏫</div>
+      <div><b>第二自提点 · 图书馆一楼大厅</b><span>今日可取 41 本 · 距你 480m</span></div>
+      <div class="st">营业中</div>
+    </div>
+  </main>
+</div>
+
+<!-- 扫码估价 -->
+<div class="page" id="pg-scan">
+  <div class="head" style="padding-bottom:20px">
+    <div class="brand"><div class="logo">书</div>书舟<em>扫码卖书</em></div>
+  </div>
+  <main style="padding-top:18px">
+    <div class="stepbar">
+      <div class="n">1</div><div class="lb">识别</div><div class="ln"></div>
+      <div class="n">2</div><div class="lb">选品相</div><div class="ln"></div>
+      <div class="n off">3</div><div class="lb">拿钱</div>
+    </div>
+
+    <div class="bignum" style="margin-top:12px">📖 已识别书目</div>
+    <div class="book" style="margin-top:10px">
+      <div class="cover b2">数据<br>结构</div>
+      <div style="flex:1">
+        <div class="t">数据结构（C 语言版）</div>
+        <div class="m">严蔚敏 · 清华大学出版社<br>ISBN 978-7-302-33064-5</div>
+        <div class="tags"><em>计算机学院大二在用</em><em>回收需求 ★★★★★</em></div>
+      </div>
+    </div>
+
+    <div class="bignum" style="margin-top:16px">🔍 选品相，即刻出价</div>
+    <div class="grade">
+      <div class="g" onclick="pick(this,22)"><i>✨</i><b>九成新</b><span>无笔记 无划线</span><span class="p">¥22</span></div>
+      <div class="g on" onclick="pick(this,18)"><i>📖</i><b>八成新</b><span>少量笔记</span><span class="p">¥18</span></div>
+      <div class="g" onclick="pick(this,14)"><i>📝</i><b>七成新</b><span>划线较多</span><span class="p">¥14</span></div>
+    </div>
+
+    <div class="estbox">
+      <div class="lb">预估回收价（按八成新）</div>
+      <div class="v" id="estv">¥18<small>.00</small></div>
+      <div class="tip">比书贩收价高约 40% · 钱款自提点当面结清</div>
+    </div>
+
+    <button class="btn" onclick="go('done')">确认预约 · 宿舍楼下交书</button>
+    <button class="btn ghost" onclick="go('home')">再扫一本</button>
+  </main>
+</div>
+
+<!-- 下单成功 -->
+<div class="page" id="pg-done">
+  <div class="okwrap">
+    <div class="ok">✅</div>
+    <h3>预约成功！</h3>
+    <p>回收员将于今天 18:00–20:00 到竹园 3 号楼下收书<br>钱款当面结清，也可选择转到校园卡</p>
+    <div class="okcard">
+      <div class="row"><span>书目</span><b>数据结构（C 语言版）</b></div>
+      <div class="row"><span>品相</span><b>八成新</b></div>
+      <div class="row"><span>回收价</span><b class="money">¥18.00</b></div>
+      <div class="row"><span>环保奖励</span><b style="color:var(--bar)">+15 积分 · 减碳 4.5kg</b></div>
+      <div class="row"><span>交书地点</span><b>竹园 3 号楼 · 第一自提点</b></div>
+    </div>
+    <button class="btn" onclick="go('home')">完成</button>
+  </div>
+</div>
+
+<!-- 需求预订 -->
+<div class="page" id="pg-resv">
+  <div class="head" style="padding-bottom:20px">
+    <div class="brand"><div class="logo">书</div>书舟<em>教材预订</em></div>
+  </div>
+  <main style="padding-top:18px">
+    <div class="resv">
+      <div class="top"><div class="t">概率论与数理统计（经管类）</div><div class="lock">锁价中</div></div>
+      <div class="m">统计 2601 班下学期教材 · 已订 38/45 人 · 8 月 20 日自提点取书</div>
+      <div class="row2"><div class="price2">¥12<small>新书 ¥42</small></div><button class="btn2" onclick="go('done2')">锁价预订</button></div>
+    </div>
+    <div class="resv">
+      <div class="top"><div class="t">高等数学（下册）第七版</div><div class="lock">锁价中</div></div>
+      <div class="m">同济版 · 大一下全校通用 · 已订 291 人 · 库存 62 本</div>
+      <div class="row2"><div class="price2">¥18<small>新书 ¥55.6</small></div><button class="btn2" onclick="go('done2')">锁价预订</button></div>
+    </div>
+    <div class="resv">
+      <div class="top"><div class="t">大学英语（综合教程 2）</div><div class="lock">备货中</div></div>
+      <div class="m">上海外语教育出版社 · 预计 8 月 25 日到货自提点</div>
+      <div class="row2"><div class="price2">¥9.9<small>新书 ¥38</small></div><button class="btn2" onclick="go('done2')">到货提醒</button></div>
+    </div>
+    <div class="point" style="margin-top:14px">
+      <div class="dot">🔒</div>
+      <div><b>押金保障</b><span>预订收 20% 押金，不满意随时退</span></div>
+    </div>
+  </main>
+</div>
+<div class="page" id="pg-done2">
+  <div class="okwrap">
+    <div class="ok">🎓</div>
+    <h3>预订成功！</h3>
+    <p>开学前 8 周为你锁定价，教材到货后<br>凭取书码到自提点 10 分钟拿书</p>
+    <div class="okcard">
+      <div class="row"><span>书目</span><b>概率论与数理统计</b></div>
+      <div class="row"><span>锁定价</span><b class="money">¥12.00</b></div>
+      <div class="row"><span>押金</span><b>¥2.40（可退）</b></div>
+      <div class="row"><span>取书时间</span><b>8 月 20 日起</b></div>
+    </div>
+    <button class="btn" onclick="go('home')">完成</button>
+  </div>
+</div>
+
+<!-- 我的 -->
+<div class="page" id="pg-me">
+  <div class="head" style="padding-bottom:24px">
+    <div class="brand"><div class="logo">书</div>书舟<em>我的</em></div>
+  </div>
+  <main style="padding-top:14px">
+    <div class="me">
+      <div class="pt">328</div>
+      <div class="pl">书舟积分 · 1 积分抵 0.01 元</div>
+      <div class="badges"><span>🌱 减碳 22.5kg</span><span>📚 卖出 5 本</span><span>🏆 循环达人 Lv.3</span></div>
+    </div>
+    <div class="card">
+      <div class="row"><span><i>📦</i>我的卖书订单</span><span class="r">5 单已结清 ›</span></div>
+      <div class="row"><span><i>🎓</i>我的教材预订</span><span class="r">2 本待取书 ›</span></div>
+      <div class="row"><span><i>💰</i>钱包余额</span><span class="r g">¥86.00 ›</span></div>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <div class="row"><span><i>🌱</i>我的减碳证书</span><span class="r g">已生成 ›</span></div>
+      <div class="row"><span><i>🏫</i>自提点网点</span><span class="r">2 个 ›</span></div>
+      <div class="row"><span><i>💬</i>联系客服</span><span class="r">9:00–21:00 ›</span></div>
+    </div>
+    <p style="text-align:center;font-size:10px;color:#A9BBB0;margin-top:16px">书舟 · 让每本教材多活三年</p>
+  </main>
+</div>
+
+<!-- 底部导航 -->
+<div class="nav">
+  <button class="on" id="nb-home" onclick="tab('home',this)"><i>🏠</i>首页</button>
+  <button id="nb-scan" onclick="tab('scan',this)"><i>📷</i>卖书</button>
+  <button id="nb-resv" onclick="tab('resv',this)"><i>📚</i>预订</button>
+  <button id="nb-me" onclick="tab('me',this)"><i>👤</i>我的</button>
+</div>
+
+<script>
+function go(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+document.getElementById('pg-'+p).classList.add('active');
+var m={'scan':'nb-scan','done':'nb-scan','done2':'nb-resv'};
+window.scrollTo(0,0);syncNav(m[p]||('nb-'+p));}
+function tab(p,btn){go(p);syncNav(btn.id);}
+function syncNav(id){document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
+if(id){var el=document.getElementById(id);if(el)el.classList.add('on');}}
+function pick(el,price){document.querySelectorAll('.grade .g').forEach(x=>x.classList.remove('on'));
+el.classList.add('on');
+document.getElementById('estv').innerHTML='¥'+price+'<small>.00</small>';
+document.querySelector('.estbox .lb').textContent='预估回收价（按'+el.querySelector('b').textContent+'）';}
+</script>
+</body>
+</html>
